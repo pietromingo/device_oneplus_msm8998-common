@@ -15,6 +15,16 @@
 -->
 <resources>
 
+    <!-- The list absolute paths of jar/apk files containing the device specific handlers,
+        delimited by File.pathSeparator, which defaults to ":" on Android  -->
+    <string name="config_deviceKeyHandlerLib" translatable="false">/system/product/priv-app/DeviceParts/DeviceParts.apk</string>
+
+    <!-- Full qualified name of the class that implements
+        com.android.internal.os.DeviceKeyHandler interface. -->
+    <string name="config_deviceKeyHandlerClass" translatable="false">org.omnirom.device.KeyHandler</string>
+
+    <bool name="config_proxiSensorWakupCheck">true</bool>
+
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has be tuned to be power efficient in DOZE and/or DOZE_SUSPEND
          states. -->
