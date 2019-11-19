@@ -189,7 +189,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.sys.force_sw_gles=0 \
     persist.sys.wfd.virtual=0 \
     vendor.gralloc.enable_fb_ubwc=1 \
-    vendor.gralloc.disable_wb_ubwc=1 \
     vendor.display.disable_partial_split=1 \
     vendor.display.disable_rotator_downscale=1 \
     vendor.display.disable_skip_validate=1 \
@@ -198,6 +197,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     debug.hwui.use_buffer_age=false \
     ro.min.fling_velocity=140 \
     ro.max.fling_velocity=20000
+
+# vendor prop for UBWC
+PRODUCT_PROPERTY_OVERRIDES += \
+    vendor.video.disable.ubwc=1
 
 # IOP
 PRODUCT_PROPERTY_OVERRIDES += \
