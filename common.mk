@@ -197,8 +197,7 @@ PRODUCT_PACKAGES += \
 
 # Device
 PRODUCT_PACKAGES += \
-    DeviceParts \
-    Dirac
+    DeviceParts
 
 # DRM
 PRODUCT_PACKAGES += \
