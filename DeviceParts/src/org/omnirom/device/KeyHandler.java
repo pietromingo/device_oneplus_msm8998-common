@@ -40,6 +40,7 @@ import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -72,6 +73,8 @@ import com.android.internal.os.DeviceKeyHandler;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.aosip.aosipUtils;
 import com.android.internal.statusbar.IStatusBarService;
+
+import vendor.oneplus.camera.CameraHIDL.V1_0.IOnePlusCameraProvider;
 
 public class KeyHandler implements DeviceKeyHandler {
 
@@ -115,6 +118,8 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final int FP_GESTURE_LONG_PRESS = 305;
     private static final boolean sIsOnePlus5t = android.os.Build.DEVICE.equals("OnePlus5T");
 
+    public static final String CLIENT_PACKAGE_NAME = "com.oneplus.camera";
+    public static final String CLIENT_PACKAGE_PATH = "data/misc/lineage/client_package_name";
     public static final String PACKAGE_SYSTEMUI = "com.android.systemui";
 
     private static final int[] sSupportedGestures5t = new int[]{
@@ -202,6 +207,9 @@ public class KeyHandler implements DeviceKeyHandler {
     private Toast toast;
     private final Context mSysUiContext;
     private final Context mResContext;
+    private ClientPackageNameObserver mClientObserver;
+    private IOnePlusCameraProvider mProvider;
+    private boolean isOPCameraAvail;
 
     private SensorEventListener mProximitySensor = new SensorEventListener() {
         @Override
@@ -476,6 +484,10 @@ public class KeyHandler implements DeviceKeyHandler {
         if (mUseTiltCheck) {
             mSensorManager.unregisterListener(mTiltSensorListener, mTiltSensor);
         }
+        if ((mClientObserver == null) && (isOPCameraAvail)) {
+            mClientObserver = new ClientPackageNameObserver(CLIENT_PACKAGE_PATH);
+            mClientObserver.startWatching();
+        }
     }
 
     private void enableGoodix() {
@@ -497,6 +509,10 @@ public class KeyHandler implements DeviceKeyHandler {
         if (mUseTiltCheck) {
             mSensorManager.registerListener(mTiltSensorListener, mTiltSensor,
                     SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mClientObserver != null) {
+            mClientObserver.stopWatching();
+            mClientObserver = null;
         }
     }
 
@@ -744,6 +760,27 @@ public class KeyHandler implements DeviceKeyHandler {
             toast.show();
             }
         });
+    }
+
+    private class ClientPackageNameObserver extends FileObserver {
+
+        public ClientPackageNameObserver(String file) {
+            super(CLIENT_PACKAGE_PATH, MODIFY);
+        }
+
+        @Override
+        public void onEvent(int event, String file) {
+            String pkgName = Utils.getFileValue(CLIENT_PACKAGE_PATH, "0");
+            if (event == FileObserver.MODIFY) {
+                try {
+                    Log.d(TAG, "client_package" + file + " and " + pkgName);
+                    mProvider = IOnePlusCameraProvider.getService();
+                    mProvider.setPackageName(pkgName);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "setPackageName error", e);
+                }
+            }
+        }
     }
 
     public static Context getPackageContext(Context context, String packageName) {

@@ -143,6 +143,7 @@ PRODUCT_PACKAGES += \
     camera.device@1.0-impl \
     camera.device@3.2-impl \
     libshim_camera \
+    vendor.oneplus.camera.CameraHIDL@1.0 \
     Snap
 
 PRODUCT_PACKAGES += \
