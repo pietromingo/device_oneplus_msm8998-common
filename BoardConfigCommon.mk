@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2017 The LineageOS Open Source Project
+# Copyright (C) 2019 The halogenOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +22,9 @@
 # included in a build is to use PRODUCT_PACKAGES in a product
 # definition file).
 #
+
+# Inherit from oppo-common
+-include device/oppo/common/BoardConfigCommon.mk
 
 PLATFORM_PATH := device/oneplus/msm8998-common
 
@@ -65,11 +69,12 @@ BUILD_BROKEN_DUP_RULES := true
 DEXPREOPT_GENERATE_APEX_IMAGE := true
 
 # Kernel
-BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 
-BOARD_KERNEL_CMDLINE += lpm_levels.sleep_disabled=1 sched_enable_hmp=1 sched_enable_power_aware=1 
-BOARD_KERNEL_CMDLINE += service_locator.enable=1 swiotlb=2048 androidboot.usbconfigfs=true 
-BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=a800000.dwc3 
-BOARD_KERNEL_CMDLINE += loop.max_part=16
+BOARD_KERNEL_CMDLINE := \
+	androidboot.hardware=qcom ehci-hcd.park=3 \
+	lpm_levels.sleep_disabled=1 sched_enable_hmp=1 sched_enable_power_aware=1 \
+	service_locator.enable=1 swiotlb=2048 androidboot.usbconfigfs=true \
+	androidboot.usbcontroller=a800000.dwc3 \
+	loop.max_part=7
 BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 4096
@@ -80,9 +85,9 @@ TARGET_COMPILE_WITH_MSM_KERNEL := true
 TARGET_KERNEL_ARCH := arm64
 TARGET_KERNEL_HEADER_ARCH := arm64
 TARGET_KERNEL_SOURCE := kernel/oneplus/msm8998
-TARGET_KERNEL_CONFIG := derp_defconfig
+TARGET_KERNEL_CONFIG := bromine-plus_defconfig
 TARGET_KERNEL_CLANG_COMPILE := true
-TARGET_KERNEL_CLANG_VERSION := $(shell sh -c "find prebuilts/clang/host/linux-x86/ -type f -name clang -printf \"%T@ %Tc %p\n\" | sort -n | tail -n1 | sed 's/.*clang-\(.*\)\/bin.*/\1/'")
+TARGET_KERNEL_CLANG_VERSION := 6207600
 
 # QCOM hardware
 BOARD_USES_QCOM_HARDWARE := true
@@ -120,7 +125,7 @@ AUDIO_FEATURE_ENABLED_DTS_EAGLE := false
 AUDIO_FEATURE_ENABLED_HW_ACCELERATED_EFFECTS := false
 AUDIO_FEATURE_ENABLED_AUDIOSPHERE := false
 AUDIO_FEATURE_ENABLED_USB_TUNNEL := true
-AUDIO_FEATURE_ENABLED_A2DP_OFFLOAD := false
+AUDIO_FEATURE_ENABLED_A2DP_OFFLOAD := true
 AUDIO_FEATURE_ENABLED_SPLIT_A2DP := false
 AUDIO_FEATURE_ENABLED_3D_AUDIO := false
 AUDIO_USE_DEEP_AS_PRIMARY_OUTPUT := false
@@ -178,8 +183,7 @@ TARGET_USES_MEDIA_EXTENSIONS := true
 # Charger
 BOARD_CHARGER_ENABLE_SUSPEND := true
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
-WITH_LINEAGE_CHARGER := false
-TARGET_PIXEL_CHARGE_ANIM := true
+WITH_CUSTOM_CHARGER := false
 
 # CNE and DPM
 BOARD_USES_QCNE := true
@@ -192,7 +196,6 @@ BOARD_USES_ADRENO := true
 
 TARGET_USES_C2D_COMPOSITION := true
 TARGET_USES_HWC2 := true
-TARGET_SCREEN_DENSITY := 420
 TARGET_USES_GRALLOC1 := true
 TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := 0x02000000U
 TARGET_USES_ION := true
@@ -210,14 +213,12 @@ OVERRIDE_RS_DRIVER:= libRSDriver_adreno.so
 # DRM
 TARGET_ENABLE_MEDIADRM_64 := true
 
-# Dexpreopt
+# Enable dexpreopt to speed boot time
 ifeq ($(HOST_OS),linux)
-  ifeq ($(WITH_DEXPREOPT),)
-    WITH_DEXPREOPT := true
-    WITH_DEXPREOPT_PIC := true
-    ifneq ($(TARGET_BUILD_VARIANT),user)
-      # Retain classes.dex in APK's for non-user builds
-      DEX_PREOPT_DEFAULT := nostripping
+  ifneq ($(TARGET_BUILD_VARIANT),eng)
+    ifeq ($(WITH_DEXPREOPT),)
+      WITH_DEXPREOPT := true
+      WITH_DEXPREOPT_BOOT_IMG_AND_SYSTEM_SERVER_ONLY := true
     endif
   endif
 endif
@@ -263,6 +264,10 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 TARGET_USES_MKE2FS := true
 
+# Power
+TARGET_TAP_TO_WAKE_NODE := "/proc/touchpanel/double_tap_enable"
+TARGET_USES_INTERACTION_BOOST := true
+
 # Recovery
 TARGET_RECOVERY_FSTAB := $(PLATFORM_PATH)/recovery.fstab
 #TARGET_RECOVERY_UI_LIB := librecovery_ui_msm
@@ -273,6 +278,7 @@ TARGET_RECOVERY_UPDATER_LIBS := librecovery_updater_oneplus
 TARGET_RELEASETOOLS_EXTENSIONS := $(PLATFORM_PATH)
 
 # RIL
+#TARGET_RIL_VARIANT := caf
 PROTOBUF_SUPPORTED := true
 
 # Root
@@ -283,6 +289,7 @@ BOARD_ROOT_EXTRA_SYMLINKS += /mnt/vendor/persist:/persist
 
 # SELinux
 include device/qcom/sepolicy-legacy-um/sepolicy.mk
+#include device/qcom/sepolicy/sepolicy.mk
 
 BOARD_SEPOLICY_DIRS += $(PLATFORM_PATH)/sepolicy/vendor
 BOARD_PLAT_PUBLIC_SEPOLICY_DIR += $(PLATFORM_PATH)/sepolicy/public
@@ -297,9 +304,6 @@ PRODUCT_VENDOR_MOVE_ENABLED := true
 TARGET_COPY_OUT_VENDOR := vendor
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := true
 
-# Vendor security patch level
-VENDOR_SECURITY_PATCH := 2019-12-01
-
 # Wifi
 BOARD_HAS_QCOM_WLAN := true
 BOARD_HAS_QCOM_WLAN_SDK := true
@@ -311,7 +315,6 @@ BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
 WIFI_DRIVER_FW_PATH_AP := "ap"
 WIFI_DRIVER_FW_PATH_STA := "sta"
 WIFI_DRIVER_FW_PATH_P2P := "p2p"
-WIFI_DRIVER_OPERSTATE_PATH := "/sys/class/net/wlan0/operstate"
 WIFI_HIDL_FEATURE_DUAL_INTERFACE := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 WIFI_HIDL_FEATURE_DISABLE_AP_MAC_RANDOMIZATION := true

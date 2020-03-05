@@ -3509,7 +3509,7 @@ case "$target" in
 	echo 1574400 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
 	echo 1 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/pl
 	echo "0:1324800" > /sys/module/cpu_boost/parameters/input_boost_freq
-	echo 200 > /sys/module/cpu_boost/parameters/input_boost_ms
+	echo 120 > /sys/module/cpu_boost/parameters/input_boost_ms
 
 	# Enable Adaptive LMK liuyaxin@framework.perf change
 	echo "18432,23040,27648,51256,150296,200640" > /sys/module/lowmemorykiller/parameters/minfree
@@ -3581,13 +3581,6 @@ case "$target" in
 	# cpuset parameters
         echo 0-3 > /dev/cpuset/background/cpus
         echo 0-3 > /dev/cpuset/system-background/cpus
-
-        # Setup final blkio
-        # value for group_idle is us
-        echo 1000 > /dev/blkio/blkio.weight
-        echo 100 > /dev/blkio/background/blkio.weight
-        echo 2000 > /dev/blkio/blkio.group_idle
-        echo 0 > /dev/blkio/background/blkio.group_idle
 
 	# Turn off scheduler boost at the end
         echo 0 > /proc/sys/kernel/sched_boost
@@ -3792,35 +3785,37 @@ esac
 case "$target" in
     "msm8998" | "apq8098_latv")
 
-    # disable thermal bcl hotplug to switch governor
-    echo 0 > /sys/module/msm_thermal/core_control/enabled
-
-    # online CPU0
-    echo 1 > /sys/devices/system/cpu/cpu0/online
-    # configure governor settings for little cluster
-    echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 20000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
-    echo 500 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
-    echo 518400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    # online CPU4
-    echo 1 > /sys/devices/system/cpu/cpu4/online
-    # configure governor settings for big cluster
-    echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-    echo 20000 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
-    echo 500 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
-	echo 806400 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-
-    # re-enable thermal and BCL hotplug
-    echo 1 > /sys/module/msm_thermal/core_control/enabled
-
-    # Enable input boost configuration
-    # simon.ma+@2018/09/28,modify the input_boost_freq and input_boost_ms to make the anim smooth
-    echo "0:1036800 4:1056000" > /sys/module/cpu_boost/parameters/input_boost_freq
-    echo 450 > /sys/module/cpu_boost/parameters/input_boost_ms
+	# Enable sched systrace
+	echo 1 >  /sys/kernel/debug/tracing/events/sched/sched_get_task_cpu_cycles/enable
 
 	# Enable Adaptive LMK denzel.chen
 	echo "18432,23040,27648,51256,150296,200640" > /sys/module/lowmemorykiller/parameters/minfree
 
+        for cpubw in /sys/class/devfreq/*qcom,cpubw*
+        do
+            echo "bw_hwmon" > $cpubw/governor
+            echo 50 > $cpubw/polling_interval
+            echo 1525 > $cpubw/min_freq
+            echo "3143 5859 11863 13763" > $cpubw/bw_hwmon/mbps_zones
+            echo 4 > $cpubw/bw_hwmon/sample_ms
+            echo 34 > $cpubw/bw_hwmon/io_percent
+            echo 20 > $cpubw/bw_hwmon/hist_memory
+            echo 10 > $cpubw/bw_hwmon/hyst_length
+            echo 0 > $cpubw/bw_hwmon/low_power_ceil_mbps
+            echo 34 > $cpubw/bw_hwmon/low_power_io_percent
+            echo 20 > $cpubw/bw_hwmon/low_power_delay
+            echo 0 > $cpubw/bw_hwmon/guard_band_mbps
+            echo 250 > $cpubw/bw_hwmon/up_scale
+            echo 1600 > $cpubw/bw_hwmon/idle_mbps
+        done
+
+        for memlat in /sys/class/devfreq/*qcom,memlat-cpu*
+        do
+            echo "mem_latency" > $memlat/governor
+            echo 10 > $memlat/polling_interval
+            echo 400 > $memlat/mem_latency/ratio_ceil
+        done
+        echo "cpufreq" > /sys/class/devfreq/soc:qcom,mincpubw/governor
 	if [ -f /sys/devices/soc0/soc_id ]; then
 		soc_id=`cat /sys/devices/soc0/soc_id`
 	else
@@ -3863,41 +3858,12 @@ case "$target" in
 	    ;;
 	esac
 
-	echo N > /sys/module/lpm_levels/system/pwr/cpu0/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/pwr/cpu1/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/pwr/cpu2/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/pwr/cpu3/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/perf/cpu4/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/perf/cpu5/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/perf/cpu6/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/perf/cpu7/ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/pwr/pwr-l2-dynret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/pwr/pwr-l2-ret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/perf/perf-l2-dynret/idle_enabled
-	echo N > /sys/module/lpm_levels/system/perf/perf-l2-ret/idle_enabled
-	echo N > /sys/module/lpm_levels/parameters/sleep_disabled
-
-        echo 0-3 > /dev/cpuset/background/cpus
-        echo 0-3 > /dev/cpuset/system-background/cpus
-        echo 0 > /proc/sys/kernel/sched_boost
-
         # Set Memory parameters
         configure_memory_parameters
 
         # Chris.Gao@OnePlus.Power&&Perf, 2019/2/14 , Disable adaptive_lmk
         echo 0 > /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
         # End Disable adaptive_lmk
-
-        if [ -f "/defrag_aging.ko" ]; then
-           insmod /defrag_aging.ko
-        else
-           insmod /system/lib/modules/defrag.ko
-        fi
-        sleep 1
-        lsmod | grep defrag
-        if [ $? != 0 ]; then
-           echo 1 > /sys/module/defrag_helper/parameters/disable
-        fi
     ;;
 esac
 

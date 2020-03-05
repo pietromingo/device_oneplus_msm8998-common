@@ -57,8 +57,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.audio.sdk.ssr=false \
     vendor.audio.offload.gapless.enabled=true \
     vendor.audio.safx.pbe.enabled=false \
-    vendor.audio.spkr_prot.tx.sampling_rate=48000 \
-    vendor.audio.parser.ip.buffer.size=0 \
+    vendor.audio.parser.ip.buffer.size=262144 \
     vendor.audio.flac.sw.decoder.24bit=true \
     persist.vendor.bt.a2dp_offload_cap=false \
     persist.vendor.bt.enable.splita2dp=false \
@@ -67,6 +66,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     vendor.audio.hw.aac.encoder=true \
     vendor.fm.a2dp.conc.disabled=true \
     vendor.audio.noisy.broadcast.delay=600 \
+    vendor.audio.spkr_prot.tx.sampling_rate=48000 \
+    vendor.audio.volume.headset.gain.depcal=true \
     ro.config.media_vol_steps=25 \
     ro.config.vc_call_vol_steps=11 \
     af.resampler.quality=7
@@ -135,10 +136,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Camera
 PRODUCT_PROPERTY_OVERRIDES += \
-    vendor.camera.aux.packagelist=com.oneplus.camera,com.google.android.GoogleCamera \
+    ro.vendor.camera.aux.packagelist=com.android.camera,com.android.camera2,com.oneplus.camera,org.lineageos.snap,com.google.android.Pixel2ModUrnyx05 \
     vendor.camera.hal1.packagelist=com.whatsapp \
-    persist.camera.privapp.list=com.oneplus.camera \
-    persist.vendor.camera.privapp.list=com.oneplus.camera \
     persist.camera.mobicat=2 \
     persist.camera.stats.debugexif=3080192 \
     persist.ts.rtmakeup=false \
@@ -178,6 +177,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Graphics
 PRODUCT_PROPERTY_OVERRIDES += \
+    ro.sf.lcd_density=420 \
     ro.opengles.version=196610 \
     ro.sf.hwc_set_default_colormode=true \
     debug.sf.hw=1 \
@@ -233,6 +233,14 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.nfc.port=I2C \
     persist.nfc.smartcard.config=SIM1,eSE1
 
+# Perf
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.sys.fw.bg_apps_limit=60 \
+    ro.vendor.extension_library=libqti-perfd-client.so \
+    ro.am.reschedule_service=true \
+    sched.colocate.enable=1 \
+    sys.games.gt.prof=1
+
 # QSEE
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.sys.qsee=yes
@@ -266,7 +274,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.rild.nitz_short_ons_3="" \
     ril.subscription.types=NV,RUIM \
     ro.telephony.default_network=22,20 \
-    ro.telephony.use_old_mnc_mcc_format=true \
     telephony.lteOnCdmaDevice=1 \
     ro.telephony.iwlan_operation_mode=legacy \
     keyguard.no_require_sim=true \
@@ -279,6 +286,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.radio.hw_mbn_update=0 \
     persist.radio.sw_mbn_update=0 \
     persist.radio.start_ota_daemon=0 \
+    persist.sys.fflag.override.settings_network_and_internet_v2=true \
     persist.vendor.radio.apm_sim_not_pwdn=1 \
     persist.vendor.radio.custom_ecc=1 \
     persist.vendor.radio.procedure_bytes=SKIP \
@@ -320,6 +328,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.surface_flinger.force_hwc_copy_for_virtual_displays=true \
     ro.surface_flinger.max_virtual_display_dimension=4096 \
+    ro.surface_flinger.protected_contents=true \
     ro.surface_flinger.vsync_event_phase_offset_ns=2000000 \
     ro.surface_flinger.vsync_sf_event_phase_offset_ns=6000000 \
     ro.surface_flinger.set_display_power_timer_ms=10000 \
@@ -327,12 +336,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.surface_flinger.set_idle_timer_ms=9000
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    debug.sf.disable_backpressure=1 \
     debug.sf.early_phase_offset_ns=1500000 \
     debug.sf.early_app_phase_offset_ns=1500000 \
     debug.sf.early_gl_phase_offset_ns=3000000 \
-    debug.sf.early_gl_app_phase_offset_ns=15000000 \
-    debug.sf.enable_gl_backpressure=1
+    debug.sf.early_gl_app_phase_offset_ns=15000000
 
 # Timeservice
 PRODUCT_PROPERTY_OVERRIDES += \

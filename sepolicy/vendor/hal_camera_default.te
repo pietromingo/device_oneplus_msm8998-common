@@ -1,5 +1,5 @@
-hal_client_domain(hal_camera_default, hal_configstore)
-hal_client_domain(hal_camera_default, hal_graphics_allocator)
+binder_call(hal_camera_default, hal_configstore_default)
+binder_call(hal_camera_default, hal_graphics_allocator_default)
 
 allow hal_camera_default system_server:unix_stream_socket { read write };
 

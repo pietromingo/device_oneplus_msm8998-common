@@ -146,7 +146,6 @@ firmware_directories /vendor/firmware_mnt/image/
 /dev/adsprpc-smd-secure   0644   system     system
 /dev/system_health_monitor 0644  radio      system
 /dev/mdss_rotator         0664   system     system
-/dev/cpu_dma_latency      0660   system     system
 
 #QDSS
 /dev/byte-cntr            0660   system    oem_2902
@@ -207,8 +206,6 @@ firmware_directories /vendor/firmware_mnt/image/
 /dev/ttyGS0               0660   system     system
 /dev/i2c-5                0660   media       media
 /dev/avtimer              0660   system     audio
-
-/dev/aud_pasthru_adsp     0660   system     audio
 
 # DVB devices
 /dev/dvb/adapter0/demux*  0440   media       media
